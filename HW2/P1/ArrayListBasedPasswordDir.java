@@ -1,25 +1,16 @@
 import java.io.*;
+import java.util.ArrayList; 
  /** This is an implementation of the PhoneDirectory interface that uses
   *   an array to store the data.
   *   @author Koffman & Wolfgang
   */
 
-public class ArrayBasedPasswordDir
-    implements PwdDirectory {
+public class ArrayListBasedPasswordDir
+    implements PwdDirectory2 {
 
-  // Data Fields
-
-  /** The initial capacity of the array */
-  private static final int INITIAL_CAPACITY = 10;
-
-  /** The current capacity of the array */
-  private int capacity = INITIAL_CAPACITY;
-
-  /** The current size of the array (number of directory entries) */
-  private int size = 0;
 
   /** The array to contain the directory data */
-  private PasswordEntry[] theDirectory = new PasswordEntry[capacity];
+  private ArrayList<PasswordEntry> theDirectory = new ArrayList<PasswordEntry>();
 
   /** The data file that contains the directory data */
   private String sourceName = null;
@@ -76,8 +67,8 @@ public class ArrayBasedPasswordDir
     String oldNumber = null;
     int index = find(name);
     if (index > -1) {
-      oldNumber = theDirectory[index].getPassword();
-      theDirectory[index].setPassword(number);
+      oldNumber = theDirectory.get(index).getPassword();
+      theDirectory.get(index).setPassword(number);
     }
     else {
       add(name, number);
@@ -93,7 +84,7 @@ public class ArrayBasedPasswordDir
   public String lookupEntry(String name) {
     int index = find(name);
     if (index > -1) {
-      return theDirectory[index].getPassword();
+      return theDirectory.get(index).getPassword();
     }
     else {
       return null;
@@ -114,10 +105,10 @@ public class ArrayBasedPasswordDir
             new FileWriter(sourceName));
 
         // Write each directory entry to the file.
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < theDirectory.size(); i++) {
           // Write the name and pass.
-          if (!theDirectory[i].getName().isEmpty()) {
-            out.printf("%s %s\n", theDirectory[i].getName(), theDirectory[i].getPassword());
+          if (!theDirectory.get(i).getName().isEmpty()) {
+            out.printf("%s %s\n", theDirectory.get(i).getName(), theDirectory.get(i).getPassword());
 
           }
         }
@@ -140,8 +131,8 @@ public class ArrayBasedPasswordDir
               If the name is not in the directory, returns -1
    */
   private int find(String name) {
-    for (int i = 0; i < size; i++) {
-      if (theDirectory[i].getName().equals(name)) {
+    for (int i = 0; i < theDirectory.size(); i++) {
+      if (theDirectory.get(i).getName().equals(name)) {
         return i;
       }
     }
@@ -153,20 +144,7 @@ public class ArrayBasedPasswordDir
       @param number The number of the new person
    */
   private void add(String name, String number) {
-    if (size >= capacity) {
-      reallocate();
-    }
-    theDirectory[size] = new PasswordEntry(name, number);
-    size++;
-  }
-
-  /** Allocate a new array to hold the directory. */
-  private void reallocate() {
-    capacity *= 2;
-    PasswordEntry[] newDirectory = new PasswordEntry[capacity];
-    System.arraycopy(theDirectory, 0, newDirectory, 0,
-                     theDirectory.length);
-    theDirectory = newDirectory;
+    theDirectory.add(new PasswordEntry(name, number));
   }
 
   public String removeEntry(String name){
@@ -174,9 +152,8 @@ public class ArrayBasedPasswordDir
     if (index == -1) {
       return name + " is not in the directory.";
     }else{
-      theDirectory[index].remove();
+      theDirectory.remove(index);
       modified = true;
-      size--;
       return name + " has been removed.";
     }
 
@@ -192,5 +169,14 @@ public class ArrayBasedPasswordDir
       }
     }
     return false;
+  }
+  
+  public String toString(){
+    StringBuilder ret = new StringBuilder();
+    for (PasswordEntry p : theDirectory){
+      ret.append(p.getName());
+      ret.append('\n');
+    }
+    return ret.toString();
   }
 }

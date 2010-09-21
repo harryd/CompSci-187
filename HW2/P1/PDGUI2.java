@@ -1,18 +1,18 @@
-import javax.swing.*;
+import javax.swing.JOptionPane;
 
 /** This class is an implementation of PDUserInterface
  *   that uses JOptionPane to display the menu of command choices.
  *   @author Koffman & Wolfgang
  */
 
-public class PDGUI
-    implements PDUserInterface {
+public class PDGUI2 implements PDUserInterface2 {
 
   /** A reference to the PasswordDirectory object to be processed.
       Globally available to the command-processing methods.
    */
 
-  private PwdDirectory theDirectory = null;
+  private PwdDirectory2 theDirectory = null;
+  private long elapsed;
 
   // Methods
 
@@ -24,10 +24,11 @@ public class PDGUI
              to be processed
    */
 
-  public void processCommands(PwdDirectory thePWDirectory) {
+  public void processCommands(PwdDirectory2 thePWDirectory) {
 
     String[] commands = {
-
+        "Runtime",
+        "Show All",
         "Add/Change Entry",
         "Look Up Entry",
         "Remove Entry",
@@ -50,18 +51,24 @@ public class PDGUI
           commands[commands.length - 1]); // Default choice
       switch (choice) {
         case 0:
+    	  runtimetest();
+    	  break;
+        case 1:
+    	  showAll();
+    	  break;
+        case 2:
           doAddChangeEntry();
           break;
-        case 1:
+        case 3:
           doLookupEntry();
           break;
-        case 2:
+        case 4:
           doRemoveEntry();
           break;
-        case 3:
+        case 5:
           doSave();
           break;
-        case 4:
+        case 6:
           break;
         default: // Do nothing.
       }
@@ -147,13 +154,24 @@ public class PDGUI
    */
 
   private void doRemoveEntry() {
-    // Request the name.
-    String message = null;
-    String theName = JOptionPane.showInputDialog("Enter name");
-    
-    message = theDirectory.removeEntry(theName);
-    // Display the result.
-    JOptionPane.showMessageDialog(null, message);
+	    // Request the name.
+	  	String message = null;
+	    String theName = JOptionPane.showInputDialog("Enter name");
+	    theDirectory.removeEntry(theName);
+	    message = theName + " has been removed from the directory";
+	    // Display the result.
+	    JOptionPane.showMessageDialog(null, message);
+  }
+
+  private void runtimetest() {
+	    long startTime = System.currentTimeMillis();
+        for (int i=0;i<2000;i++)
+        	theDirectory.removeEntry("b");
+	    long stopTime = System.currentTimeMillis();
+	    elapsed = stopTime - startTime;
+	    String message = "runtime to remove 2000 items:" + elapsed + "ms.";
+	    // Display the result.
+	    JOptionPane.showMessageDialog(null, message);
   }
 
   /** Method to save the directory to the data file.
@@ -169,13 +187,20 @@ public class PDGUI
 	JOptionPane.showMessageDialog(null, message);
   }
 
+  private void showAll() {
+	    // Request the name.
+	  	String message = theDirectory.toString();
+	    // Display the result.
+	    JOptionPane.showMessageDialog(null, message);
+  }
+
   public static void main(String[] args){
 	  // Is Eclipse telling you your text file doesn't exist?
 	  // Uncomment the following line and find out where Eclipse is looking for it.
 	  // System.out.println(System.getProperty("user.dir"));
 	  // Then just move your file to that location and you won't get any more file I/O errors.
-	  PDGUI gui = new PDGUI();
-	  PwdDirectory ourdir = new ArrayBasedPasswordDir();
+	  PDGUI2 gui = new PDGUI2();
+	  PwdDirectory2 ourdir = new ArrayListBasedPasswordDir();
 	  ourdir.loadData("pwds.txt");
 	  gui.processCommands(ourdir);
   }
