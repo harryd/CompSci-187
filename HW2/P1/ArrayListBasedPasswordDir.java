@@ -173,9 +173,17 @@ public class ArrayListBasedPasswordDir
   
   public String toString(){
     StringBuilder ret = new StringBuilder();
+    int len = 0;
     for (PasswordEntry p : theDirectory){
+      len++;
       ret.append(p.getName());
+      ret.append(": ");
+      ret.append(p.getPassword());
       ret.append('\n');
+      if (len>30){
+        ret.append("The directory is to long to list more.\n");
+        return ret.toString();
+      }
     }
     return ret.toString();
   }

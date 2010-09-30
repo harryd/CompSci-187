@@ -12,6 +12,8 @@ public class LinkedListBasedPasswordDir
   /** The array to contain the directory data */
   private LinkedList<PasswordEntry> theDirectory = new LinkedList<PasswordEntry>();
 
+  private ListIterator it = theDirectory.listIterator();
+
   /** The data file that contains the directory data */
   private String sourceName = null;
 
@@ -63,18 +65,18 @@ public class LinkedListBasedPasswordDir
       @param number The new number to be assigned
       @return The old number or, if a new entry, null
    */
-  public String addOrChangeEntry(String name, String number) {
-    String oldNumber = null;
-    int index = find(name);
-    if (index > -1) {
-      oldNumber = theDirectory.get(index).getPassword();
-      theDirectory.get(index).setPassword(number);
+  public String addOrChangeEntry(String name, String newPass) {
+    String oldPass = null;
+    
+    if (find(name) != null) {
+      oldPass = find(name).getPassword();
+      find(name).setPassword(newPass);
     }
     else {
-      add(name, number);
+      add(name, newPass);
     }
     modified = true;
-    return oldNumber;
+    return oldPass;
   }
 
   /** Look up an entry.
@@ -82,13 +84,12 @@ public class LinkedListBasedPasswordDir
     @return The number. If not in the directory, null is returned
    */
   public String lookupEntry(String name) {
-    int index = find(name);
-    if (index > -1) {
-      return theDirectory.get(index).getPassword();
-    }
-    else {
-      return null;
-    }
+      if (find(name) != null){
+         return find(name).getPassword();
+      }else{
+          return null;
+      }
+
   }
 
   /** Method to save the directory.
@@ -130,13 +131,16 @@ public class LinkedListBasedPasswordDir
       @return The index of the entry with the requested name.
               If the name is not in the directory, returns -1
    */
-  private int find(String name) {
-    for (int i = 0; i < theDirectory.size(); i++) {
-      if (theDirectory.get(i).getName().equals(name)) {
-        return i;
-      }
+  private PasswordEntry find(String name) {
+    ListIterator<PasswordEntry> it = theDirectory.listIterator();
+
+    while (it.hasNext()){
+        PasswordEntry p = it.next();
+        if (p.getName().equals(name)){
+            return p;
+        }
     }
-    return -1; // Name not found.
+    return null; // Name not found.
   }
 
   /** Add an entry to the directory.
@@ -148,13 +152,12 @@ public class LinkedListBasedPasswordDir
   }
 
   public String removeEntry(String name){
-    int index = find(name);
-    if (index == -1) {
-      return name + " is not in the directory.";
-    }else{
-      theDirectory.remove(index);
+    if (theDirectory.remove(find(name))) {
       modified = true;
       return name + " has been removed.";
+
+    }else{
+      return name + " is not in the directory.";
     }
 
   }
@@ -173,9 +176,17 @@ public class LinkedListBasedPasswordDir
   
   public String toString(){
     StringBuilder ret = new StringBuilder();
+    int len = 0;
     for (PasswordEntry p : theDirectory){
+      len++;
       ret.append(p.getName());
+      ret.append(": ");
+      ret.append(p.getPassword());
       ret.append('\n');
+      if (len>30){
+        ret.append("The directory is to long to list more.\n");
+        return ret.toString();
+      }
     }
     return ret.toString();
   }
